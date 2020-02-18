@@ -27,12 +27,12 @@ def ts():
 
 	with open(dnsFile) as f:
 	    for line in f:
-	        tokens = line.split()
+	        tokens = line.lower().split()
 	        host = tokens[0]
 	        ip = tokens[1]
 	        flag = tokens[2]
 	        # assign the line to the dict
-	       	dns[host] = line
+	       	dns[host] = line.lower()
 
 	#  establish socket and start listening on the port
 	ts_socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)

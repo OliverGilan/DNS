@@ -24,15 +24,15 @@ dns = {}
 
 with open(dnsFile) as f:
     for line in f:
-        tokens = line.split()
+        tokens = line.lower().split()
         host = tokens[0]
         ip = tokens[1]
         flag = tokens[2]
 
-        if flag == "NS":
-            dns["NS"] = line
+        if flag == "ns":
+            dns["ns"] = line.lower()
         else:
-            dns[host] = line
+            dns[host] = line.lower()
 
 #  establish socket and start listening on the port
 rs_socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
