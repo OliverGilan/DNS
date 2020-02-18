@@ -12,4 +12,8 @@ with open(dnsFile) as f:
         ip = tokens[1]
         flag = tokens[2]
 
+        dns[host] = line
+
+
+
         
