@@ -36,24 +36,25 @@ def ts():
 
 	#  establish socket and start listening on the port
 	ts_socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-	ts_socket.bind('', 19190)
+	ts_socket.bind('', port)
 	print("TS server has been initialized and is listening for connections on port: 19190")
 		
 	# set timeout
-	ts_socket.settimeout(2.0)
+	# ts_socket.settimeout(2.0)
 
 	# listening loop
 	while (True):	
 		# get client message
 		msg, addr = ts_socket.recvfrom(max_buffer)
 		decoded_msg = msg.decode()
-
+        
 		# find in dictionary
-		tokens = decoded_msg.split()
+		# tokens = decoded_msg.split()
 		# send the full message to the client, else send an error
-		if dns[tokens[0]]: 
-			ts_socket.sendto(dns[tokens[0]], addr)
-		else: 
+		# if dns[tokens[0]]: 
+        if dns[decoded_msg]:
+		    ts_socket.sendto(dns[decoded_msg].encode(), addr)
+        else: 
 			ts_socket.sendto("Error:HOST NOT FOUND", addr)
 
 
