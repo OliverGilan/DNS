@@ -39,6 +39,9 @@ def ts():
 	ts_socket.bind('', 19190)
 	print("TS server has been initialized and is listening for connections on port: 19190")
 		
+	# set timeout
+	ts_socket.settimeout(2.0)
+
 	# listening loop
 	while (True):	
 		# get client message
