@@ -1,17 +1,15 @@
 '''
 *** Authors: Nicolas Carchio and Oliver Gilan *** 
 	
-	Root-Level DNS server (RS)
-	- maintains a DNS_table of three fields: 
-		- Hostname
-		- IP address
-		- Flag (A or NS)
-	1. reads in DNS records from a file 
-		- dictionary to maintain the table 
-	2. client sends queried hostname as a string to TS
-	3. The TS program looks up the hostname in its DNS_table (dictionary) 
-		3a. if there is a match, we sent the entry as a string
-		3b. if there is no match, we send an error message: "Error:HOST NOT FOUND"
+	Client-Level Script
+	1. reads in hostnames from a file 
+		- Loops line by line
+	2. Sends hostname as a string to RS
+        - Checks response flag. If
+            - A: write to file
+            - NS: send hostname to TS
+        - Prints error if no response
+	3. Write response to file
 '''
 import sys
 import socket
@@ -25,19 +23,16 @@ fileName = sys.argv[4]
 buffer = 1024
 
 c_socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-c_socket.settimeout(0.5)
+c_socket.settimeout(1.0)
 
 with open(fileName) as infile:
     with open("RESOLVED.txt", "w+") as outfile:
         for line in infile:
             sanitized = line.lower().strip("\r\n")
             c_socket.sendto(sanitized, (rsHost, rsPort))
-            print "sent"
             try:
                 msg, addr = c_socket.recvfrom(buffer)
-                print 'rec'
                 tokens = msg.split()
-                print tokens
                 if tokens[2] == "a":
                     outfile.write(msg)
                 else:
