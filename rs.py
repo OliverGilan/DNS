@@ -17,14 +17,14 @@
 import sys
 import socket
 
-port = sys.argv[1]
+port = int(sys.argv[1])
 dnsFile = sys.argv[2]
 
 dns = {}
 
 with open(dnsFile) as f:
     for line in f:
-        tokens = line.lower().split()
+        tokens = line.lower().strip().split()
         host = tokens[0]
         ip = tokens[1]
         flag = tokens[2]
@@ -36,18 +36,17 @@ with open(dnsFile) as f:
 
 #  establish socket and start listening on the port
 rs_socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-rs_socket.bind('', port)
-print("RS server has been initialized and is listening for connections on port: {}".format(port))
+rs_socket.bind(('', port))
+print "RS server has been initialized and is listening for connections on port: {}".format(port)
 
 while True:
     msg, addr = rs_socket.recvfrom(1024)
-    decoded = msg.decode()
-
-	# find in dictionary
-    if dns[decoded]:
-	    rs_socket.sendto(dns[decoded].encode(), addr)
+    # decoded = msg.decode()
+    # print msg
+    # print dns[decoded]
+    if msg in dns:
+        returnMessage = str.encode(dns[msg])
+        rs_socket.sendto(returnMessage, addr)
     else: 
-		rs_socket.sendto(dns["NS"].encode(), addr)
-
-
-        
+        returnMessage = str.encode(dns["ns"])
+        rs_socket.sendto(returnMessage, addr)

@@ -19,44 +19,36 @@ import sys
 
 max_buffer = 100000
 
-def ts(): 
-	# set up dictionary and read in from file
-	dns = {}
-	port = sys.argv[1]
-	dnsFile = sys.argv[2]
+# set up dictionary and read in from file
+dns = {}
+port = sys.argv[1]
+dnsFile = sys.argv[2]
 
-	with open(dnsFile) as f:
-	    for line in f:
-	        tokens = line.lower().split()
-	        host = tokens[0]
-	        ip = tokens[1]
-	        flag = tokens[2]
-	        # assign the line to the dict
-	       	dns[host] = line.lower()
+with open(dnsFile) as f:
+	for line in f:
+	    tokens = line.lower().split()
+	    host = tokens[0]
+	    ip = tokens[1]
+	    flag = tokens[2]
+	    # assign the line to the dict
+	    dns[host] = line.lower()
 
-	#  establish socket and start listening on the port
-	ts_socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-	ts_socket.bind('', port)
-	print("TS server has been initialized and is listening for connections on port: 19190")
+#  establish socket and start listening on the port
+ts_socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+ts_socket.bind(('', int(port)))
+print("TS server has been initialized and is listening for connections on port: {}".format(port))
 		
-	# set timeout
-	# ts_socket.settimeout(2.0)
+# set timeout
+# ts_socket.settimeout(2.0)
 
-	# listening loop
-	while (True):	
+# listening loop
+while (True):	
 		# get client message
-		msg, addr = ts_socket.recvfrom(max_buffer)
-		decoded_msg = msg.decode()
-        
-		# find in dictionary
-		# tokens = decoded_msg.split()
-		# send the full message to the client, else send an error
-		# if dns[tokens[0]]: 
-        if dns[decoded_msg]:
-		    ts_socket.sendto(dns[decoded_msg].encode(), addr)
-        else: 
-			ts_socket.sendto("Error:HOST NOT FOUND", addr)
-
-
+	msg, addr = ts_socket.recvfrom(max_buffer)
+    
+	if msg in dns:
+		ts_socket.sendto(dns.get(msg), addr)
+	else: 
+		ts_socket.sendto("{} - Error:HOST NOT FOUND\r\n".format(msg), addr)
 
 

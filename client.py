@@ -18,29 +18,30 @@ import socket
 import select
 
 rsHost = sys.argv[1]
-rsPort = sys.argv[2]
-tsPort = sys.argv[3]
+rsPort = int(sys.argv[2])
+tsPort = int(sys.argv[3])
 fileName = sys.argv[4]
 
 buffer = 1024
 
 c_socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-c_socket.settimeout(2.0)
+c_socket.settimeout(0.5)
 
 with open(fileName) as infile:
-    with open("RESOLVED.txt", "a+") as outfile:
+    with open("RESOLVED.txt", "w+") as outfile:
         for line in infile:
-            sanitized = line.lower()
-
-            c_socket.sendto(sanitized.encode(), (rsHost, rsPort))
-
+            sanitized = line.lower().strip("\r\n")
+            c_socket.sendto(sanitized, (rsHost, rsPort))
+            print "sent"
             try:
                 msg, addr = c_socket.recvfrom(buffer)
+                print 'rec'
                 tokens = msg.split()
-                if tokens[2] == "A":
+                print tokens
+                if tokens[2] == "a":
                     outfile.write(msg)
                 else:
-                    c_socket.sendto(sanitized.encode(), (msg[0], tsPort))
+                    c_socket.sendto(sanitized, (tokens[0], tsPort))
 
                     try:
                         msgTs, addrTs = c_socket.recvfrom(buffer)
