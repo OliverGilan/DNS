@@ -18,7 +18,7 @@ import sys
 import socket
 
 port = int(sys.argv[1])
-dnsFile = sys.argv[2]
+dnsFile = "PROJI-DNSRS.txt"
 
 dns = {}
 
@@ -35,18 +35,22 @@ with open(dnsFile) as f:
             dns[host] = line.lower()
 
 #  establish socket and start listening on the port
-rs_socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-rs_socket.bind(('', port))
-print "RS server has been initialized and is listening for connections on port: {}".format(port)
+try:
+    rs_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    rs_socket.bind(('', port))
+    rs_socket.listen(1)
+except socket.error as err:
+    print('{} \n'.format("socket open error ",err))
+print "RS server has been initialized at host: {}, and is listening for connections on port: {}".format(socket.gethostname(), port)
+rssockid,addr=rs_socket.accept()
 
 while True:
-    msg, addr = rs_socket.recvfrom(1024)
-    # decoded = msg.decode()
-    # print msg
-    # print dns[decoded]
+    msg = rssockid.recv(256)
     if msg in dns:
-        returnMessage = str.encode(dns[msg])
-        rs_socket.sendto(returnMessage, addr)
+        returnMessage = dns[msg]
+        rssockid.send(returnMessage)
+        # rssockid.close()
     else: 
-        returnMessage = str.encode(dns["ns"])
-        rs_socket.sendto(returnMessage, addr)
+        returnMessage = dns["ns"]
+        rssockid.send(returnMessage)
+        # rssockid.close()

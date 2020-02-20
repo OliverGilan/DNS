@@ -17,12 +17,12 @@ import socket
 import select
 import sys
 
-max_buffer = 100000
+max_buffer = 256
 
 # set up dictionary and read in from file
 dns = {}
-port = sys.argv[1]
-dnsFile = sys.argv[2]
+port = int(sys.argv[1])
+dnsFile = "PROJI-DNSTS.txt"
 
 with open(dnsFile) as f:
 	for line in f:
@@ -34,21 +34,23 @@ with open(dnsFile) as f:
 	    dns[host] = line.lower()
 
 #  establish socket and start listening on the port
-ts_socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-ts_socket.bind(('', int(port)))
-print("TS server has been initialized and is listening for connections on port: {}".format(port))
-		
-# set timeout
-# ts_socket.settimeout(2.0)
+#  establish socket and start listening on the port
+try:
+    ts_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    ts_socket.bind(('', port))
+    ts_socket.listen(1)
+except socket.error as err:
+    print('{} \n'.format("socket open error ",err))
+print "TS server has been initialized at host: {}, and is listening for connections on port: {}".format(socket.gethostname(), port)
 
 # listening loop
 while (True):	
-		# get client message
-	msg, addr = ts_socket.recvfrom(max_buffer)
-    
+	tssockid,addr=ts_socket.accept()
+	msg = tssockid.recv(256)
 	if msg in dns:
-		ts_socket.sendto(dns.get(msg), addr)
+		returnMessage = dns[msg]
+		tssockid.send(returnMessage)
 	else: 
-		ts_socket.sendto("{} - Error:HOST NOT FOUND\r\n".format(msg), addr)
+		tssockid.send("{} - Error:HOST NOT FOUND\r\n".format(msg))
 
 
