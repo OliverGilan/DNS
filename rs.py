@@ -45,12 +45,18 @@ print "RS server has been initialized at host: {}, and is listening for connecti
 rssockid,addr=rs_socket.accept()
 
 while True:
-    msg = rssockid.recv(256)
-    if msg in dns:
-        returnMessage = dns[msg]
-        rssockid.send(returnMessage)
-        # rssockid.close()
-    else: 
-        returnMessage = dns["ns"]
-        rssockid.send(returnMessage)
-        # rssockid.close()
+    try: 
+        msg = rssockid.recv(256)
+        if msg in dns:
+            returnMessage = dns[msg]
+            rssockid.send(returnMessage)
+            # rssockid.close()
+        else: 
+            returnMessage = dns["ns"]
+            rssockid.send(returnMessage)
+            # rssockid.close()
+    except socket.error as er:
+        print "Client connection has been terminated"
+        break
+
+
